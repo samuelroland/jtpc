@@ -30,7 +30,6 @@ PARSER=plantuml-parser-cli.jar
 ### Alternative jar path when not running in Docker container, used during development
 PLAIN_PATH=plantuml-parser-cli/build/libs/plantuml-parser-cli-0.0.1-uber.jar
 if [ -f $PLAIN_PATH ]; then
-    echo "heyyy"
     PARSER=$PLAIN_PATH
 fi
 
@@ -66,13 +65,21 @@ if [ ! -z $3 ]; then
     fi
 fi
 
-if [[ ! -f $1 && ! -d $1 ]]; then
-    echo "Invalid file or folder reference to be parse"
+BASE_PATH=""
+# If we run the docker container, we prefix all path by `/cli/code`
+# this is where the current host folder is mounted in container
+if [ -d /cli/code ]; then
+    BASE_PATH="/cli/code/"
+fi
+TOSCAN="$BASE_PATH$1"
+
+if [[ ! -f $TOSCAN && ! -d $TOSCAN ]]; then
+    echo "Invalid file or folder reference to be parsed: $TOSCAN"
+    echo "Here is mounted files view in /cli/code"
+    ls /cli/code
     exit
 fi
-TOSCAN="$1"
 
-echo "hey"
 if [ -z $2 ]; then
     echo "No output PlantUML filename provided"
     exit
@@ -87,8 +94,12 @@ echo "TOSCAN=$TOSCAN"
 echo "OUTPUT=$OUTPUT"
 
 CMD="java -jar "${PARSER}" -f "${TOSCAN}" -o "${OUTPUT}" ${FINAL_PARSER_ARGS}"
-echo $CMD
+echo "Final command: $CMD"
 $CMD
 
 # Post operations
 # TODO
+
+# Done !
+echo ""
+echo "Done ! File should be created at $OUTPUT"
