@@ -2,7 +2,6 @@ package com.shuzijun.plantumlparser.core;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * plantUml方法
@@ -81,17 +80,38 @@ public class PUmlMethod {
         return comment;
     }
 
+    // Returns a list of params with line breaks when it exceeds 
+    public String paramsAsString() {
+        String result = "";
+        final int MAX = 70;
+        int currLineLength = name.length();
+        int i = 0; 
+        for (var param : paramList) {
+            if (i++ > 0) {
+                result += ", ";
+            }
+            //Insert line break with tab if line is too long
+            if (param.length() + currLineLength > MAX) {
+                result += "\\n\\t ";
+                currLineLength = 0;
+            }
+            currLineLength += param.length();
+            result += param;
+        }
+        return result;
+    }
+    
     @Override
     public String toString() {
         return VisibilityUtils.toCharacter(visibility) + " " + (isStatic ? "{static} " : "") + (isAbstract ? "{abstract}" : "")
                 + returnType + " " + name + "("
-                + (paramList.isEmpty() ? "" : paramList.stream().collect(Collectors.joining(", ")))
+                + (paramList.isEmpty() ? "" : paramsAsString())
                 + ")";
     }
 
     public String getFullName(){
         return name + "("
-                + (paramList.isEmpty() ? "" : paramList.stream().collect(Collectors.joining(", ")))
+                + (paramList.isEmpty() ? "" : paramsAsString())
                 + ")";
     }
 }

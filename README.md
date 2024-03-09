@@ -5,12 +5,14 @@ An experimental CLI wrapper (around the `plantuml-parser-cli`) to generate Plant
 I don't plan to maintain this project, I want to "just make it work" and will not expand it further. But I'm happy to document how to use it and how it works in case it's useful to someone else in my class or outside. I guess a lot of IT students are learning and need to have up-to-date UML diagrams... If you want to do other changes feel free to fork the project and continue on your own :).
 
 **Context**  
-The original problem is that it's tedious to keep your class diagrams up-to-date and it's boring because most of the work can be automated. I found this project `shuzijun/plantuml-parser` that works for 95% of what I need which is great, but I needed a way to make post operations without loosing them at each regeneration and a few changes in the generated PlantUML text. By the way, thanks a lot to @shuzijun for your effort in making in this nice tool ! I will keep the same licence, namely [Apache-2.0](LICENSE) to possible enable upstream to take back some changes...
+The original problem is that it's tedious to keep your class diagrams up-to-date and it's boring because most of the work can be automated. I found this project `shuzijun/plantuml-parser` that works for 95% of what I need which is great, but I needed a way to make post operations without loosing them at each regeneration and a few changes in the generated PlantUML text. By the way, thanks a lot to @shuzijun for your effort in making in this nice tool ! I will keep the same licence, namely [Apache-2.0](LICENSE) to enable upstream to take back some changes if needed...
 
 *Note*: the IntelliJ plugin build has been disabled because it currently fails and would require some changes to support the same feature as JTPC. I will not make it work to have the same feature as I consider the CLI is enough and solves my problem.
 
 ## Examples
 Here a few examples of schema, so you can see the final rendering. All examples are placed under [jtpc/examples folder](jtpc/examples).
+
+**TODO**
 
 ## How to setup
 *I know this is not a straightforward setup but is the best I can do in the short time I invest in this mini project...*
@@ -48,7 +50,9 @@ jtpc src/main diagram.puml
 ```
 
 Optionally, if you need to customize your schema, here is how you can do it.
-TODO
+
+**TODO**
+
 To see all possible options of the underlying parser CLI:
 ```sh
 jtpc parserhelp
@@ -60,6 +64,17 @@ jtpc parserhelp
 **Changes made to the CLI and core logic**  
 To fit my teacher's needs, I did a few changes to the source code which you can read in details in the recent commits, but here is a quick recap:
 1. Show types after variables name: instead of `int age` it displays `age: int`
+1. Add line breaks and tabs after ~70 chars, when methods definitions are too long (this avoids creating very large class rectangle)
+**TODO**
+
+
+## How to update
+In case this repository is updated, you can pull changes and do a rebuild
+```sh
+git pull
+./gradlew uberJar
+docker build -t jtpc -f jtpc/Dockerfile .
+```
 
 ----
 
