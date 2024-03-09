@@ -25,6 +25,26 @@ tasks.withType(Jar) {
     }
 }
 
+// From the Gradle docs
+// https://docs.gradle.org/current/userguide/working_with_files.html#sec:creating_uber_jar_example
+tasks.register('uberJar', Jar) {
+    archiveClassifier = 'uber'
+
+	//Added to fix error 'Entry META-INF/LICENSE is a duplicate but no duplicate handling strategy has been set'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from sourceSets.main.output
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+	// //Added to fix error of main class not found when running with java -jar
+	// manifest {
+    //     attributes["Main-Class"] = "com.shuzijun.plantumlparser.cli.CliRunner"
+    // }
+}
+
 task fatJar(type: Jar) {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
