@@ -1,9 +1,13 @@
 # JTPC
-An experimental CLI wrapper (around the `plantuml-parser-cli`) to generate PlantUML class diagrams from Java source code. I develop this CLI in a fork of original project [shuzijun/plantuml-parser](https://github.com/shuzijun/plantuml-parser).
+An experimental CLI wrapper (around the `plantuml-parser-cli`) to generate PlantUML class diagrams from Java source code. JTPC means **J**ava **T**o **P**lantUML **C**LI. I develop this CLI in a fork of original project [shuzijun/plantuml-parser](https://github.com/shuzijun/plantuml-parser). 
 
-The main benefit is to avoid loosing so much time in updating your diagram at each step.
+**Status**
+I don't plan to maintain this project, I want to "just make it work" and will not expand it further. But I'm happy to document how to use it and how it works in case it's useful to someone else in my class or outside. I guess a lot of IT students are learning and need to have up-to-date UML diagrams... If you want to do other changes feel free to fork the project and continue on your own :).
 
-Note: the IntelliJ plugin build has been disabled because it currently fails and would require some changes to support the same feature as JTPC. I will not make it work to have the same feature as I consider the CLI is enough and solves my problem.
+**Context**  
+The original problem is that it's tedious to keep your class diagrams up-to-date and it's boring because most of the work can be automated. I found this project `shuzijun/plantuml-parser` that works for 95% of what I need which is great, but I needed a way to make post operations without loosing them at each regeneration and a few changes in the generated PlantUML text. By the way, thanks a lot to @shuzijun for your effort in making in this nice tool ! I will keep the same licence, namely [Apache-2.0](LICENSE) to possible enable upstream to take back some changes...
+
+*Note*: the IntelliJ plugin build has been disabled because it currently fails and would require some changes to support the same feature as JTPC. I will not make it work to have the same feature as I consider the CLI is enough and solves my problem.
 
 ## Examples
 Here a few examples of schema, so you can see the final rendering. All examples are placed under [jtpc/examples folder](jtpc/examples).
@@ -20,14 +24,14 @@ Here a few examples of schema, so you can see the final rendering. All examples 
    ```
 1. Build the Docker image
    ```sh
-    sudo docker build -t jtpc -f jtpc/Dockerfile .
+    docker build -t jtpc -f jtpc/Dockerfile .
    ```
 1. Run the CLI
    Note: We mount the current folder to `/cli/code` in container, to give it access to the current folder. Therefore, the given path (first argument) needs to be 
     ```
     docker run -v .:/cli/code jtpc
     ```
-1. Instead of typing `docker run -v .:/cli/code jtpc` everytime I recommend to setup an alias like this
+1. Instead of typing `docker run -v .:/cli/code jtpc` everytime I recommend to setup an alias like this. You can persist this alias in your shell config (i.e. `.bashrc`)
     ```sh
     alias jtpc="docker run -v .:/cli/code jtpc"
     ```
