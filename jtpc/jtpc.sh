@@ -27,6 +27,13 @@
 
 # Constants
 PARSER=plantuml-parser-cli.jar
+### Alternative jar path when not running in Docker container, used during development
+PLAIN_PATH=plantuml-parser-cli/build/libs/plantuml-parser-cli-0.0.1-uber.jar
+if [ -f $PLAIN_PATH ]; then
+    echo "heyyy"
+    PARSER=$PLAIN_PATH
+fi
+
 PARSER_ARGS="-fdef -fpri -fpro -fpub -mdef -mpri -mpro -mpub -sctr -sdctr"
 
 # Command "parserhelp"
