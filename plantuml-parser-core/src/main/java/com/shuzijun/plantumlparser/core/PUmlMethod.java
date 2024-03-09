@@ -85,13 +85,13 @@ public class PUmlMethod {
     public String toString() {
         return VisibilityUtils.toCharacter(visibility) + " " + (isStatic ? "{static} " : "") + (isAbstract ? "{abstract}" : "")
                 + returnType + " " + name + "("
-                + (paramList.isEmpty() ? "" : paramList.stream().collect(Collectors.joining(",")))
+                + (paramList.isEmpty() ? "" : paramList.stream().collect(Collectors.joining(", ")))
                 + ")";
     }
 
     public String getFullName(){
         return name + "("
-                + (paramList.isEmpty() ? "" : paramList.stream().collect(Collectors.joining(",")))
+                + (paramList.isEmpty() ? "" : paramList.stream().collect(Collectors.joining(", ")))
                 + ")";
     }
 }

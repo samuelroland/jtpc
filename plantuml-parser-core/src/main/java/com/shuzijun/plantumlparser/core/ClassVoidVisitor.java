@@ -272,7 +272,8 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
             pUmlMethod.setReturnType("<<Create>>");
             pUmlMethod.setName(constructor.getNameAsString());
             for (Parameter parameter : constructor.getParameters()) {
-                pUmlMethod.addParam(parameter.getTypeAsString());
+                // Parameters now contain their type and name !
+                pUmlMethod.addParam(parameter.getNameAsString() + ": " + parameter.getTypeAsString());
             }
             pUmlClass.addPUmlMethodList(pUmlMethod);
         }
@@ -307,7 +308,8 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
             pUmlMethod.setReturnType(method.getTypeAsString());
             pUmlMethod.setName(method.getNameAsString());
             for (Parameter parameter : method.getParameters()) {
-                pUmlMethod.addParam(parameter.getTypeAsString());
+                // Parameters now contain their type and name !
+                pUmlMethod.addParam(parameter.getNameAsString() + ": " + parameter.getTypeAsString());
             }
             pUmlClass.addPUmlMethodList(pUmlMethod);
         }
