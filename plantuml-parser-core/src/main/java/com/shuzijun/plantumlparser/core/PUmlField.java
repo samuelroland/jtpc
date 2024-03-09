@@ -60,6 +60,6 @@ public class PUmlField implements PUml {
     @Override
     public String toString() {
         return VisibilityUtils.toCharacter(visibility) + " " + (isStatic ? "{static} " : "")
-                + type + " " + name;
+                + name + ": " + type;
     }
 }
