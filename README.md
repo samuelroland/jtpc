@@ -59,9 +59,9 @@ jtpc parserhelp
 ```
 
 **Static part**  
-Once you generate your diagram once, you probably want to make some light changes like adding associations (as they are not automatically generated sadly). If you directly edit your schema, you will lose your changes during next schema generation because the file is just erased each time. This is way we define a way to write a *static section*, meaning a section that is not erased during regeneration and can contain special actions like removing some patterns.
+Once you generate your diagram once, you probably want to make some small changes like adding associations (as they are not automatically generated sadly). If you directly edit your schema, you will lose your changes during next schema generation because the file is just erased each time. I defined a *static section* in generated file, a section that is not erased during regeneration and can contain special actions on the dynamic part.
 
-At the end of the schema you should find this section starting with `' STATIC` and ending in `' ENDSTATIC`. You can safely add uncommented lines for the first 2 parts. You probably noticed the `' REMOVE` line, after this you can add regex pattern that will be replaced in the above text. For example to remove a line like `- currentTime: Time` you could write `' .*: Time`. These lines must be commented ! This is particularly useful to remove some lines related to missing associations you manually added !
+At the end of the schema you should find this section starting with `' STATIC` and ending in `' ENDSTATIC`. You can safely add uncommented lines for the first 2 parts. You probably noticed the `' REMOVE` line, after this you can add regex patterns that will be **removed** in the above text. For example to remove a line like `- currentTime: Time` you could write `' .*: Time\n`. These lines must be commented so they are not part of the schema ! This is particularly useful to remove some lines related to missing associations you manually added !
 ```
 ' STATIC
 ' Style
@@ -76,14 +76,23 @@ At the end of the schema you should find this section starting with `' STATIC` a
 
 TODO: Checkout the example 
 
+TODO: Implement EDIT keyword to easily do search and replace
+
 ## How it works
 `jtpc` is just a bash script and Docker image as a convenience to easily run the `plantuml-parser-cli` developed in the original project. In addition to not needing to run `java -jar /mega/long/path/to/full/uber.jar` it enables some post operations to manually adjust the rendering.
 
+**High level steps overview:**
+1. Check args and show errors if needed
+1. Call `plantuml-parser-cli` with given arguments as -f and -o, with default params related to schema settings. The output file is a ".tmp" variant not the one given as second arg.
+1. Run post operations via PostMix.java, read tmp file and possibly existing non tmp file
+   1. Push the default section text at the start in case there is no existing non tmp file or no static section has been found
+   1. Reuse the existing section, push it at the start, apply removal patterns.
+   1. Save the final text in non tmp file
+
 **Changes made to the CLI and core logic**  
-To fit my teacher's needs, I did a few changes to the source code which you can read in details in the recent commits, but here is a quick recap:
+To fit my teacher's needs or just making things prettier, I did a few changes to the source code which you can read in details in the recent commits, but here is a quick recap:
 1. Show types after variables name: instead of `int age` it displays `age: int`
 1. Add line breaks and tabs after ~70 chars, when methods definitions are too long (this avoids creating very large class rectangle)
-**TODO**
 
 
 ## How to update
