@@ -44,10 +44,12 @@ if [ "$1" == "parserhelp" ]; then
     exit
 fi
 
-# Welcome message
-echo "JTPC - Java To PlantUML CLI"
-echo "Usage: <Java file or folder to parse> <Out PlantUML filename> [<Parser options file>]"
-echo ""
+# Welcome message if no arg
+if [ $# -eq 0 ]; then
+    echo "JTPC - Java To PlantUML CLI"
+    echo "Usage: <Java file or folder to parse> <Out PlantUML filename> [<Parser options file>]"
+    echo ""
+fi
 
 # Checks args count
 if [ $# -lt 2 ]; then
@@ -84,7 +86,9 @@ if [ -z $2 ]; then
     echo "No output PlantUML filename provided"
     exit
 fi
-OUTPUT="./$2"   ## we add ./ to avoid fail of ParserProgram.getParentFile() call
+OUTPUT="$2"
+OUTPUT_BASE="/cli/code/$OUTPUT"
+OUTPUT_BASE_TMP="/cli/code/$OUTPUT.tmp"
 
 # Finally run the PUML generation !
 echo "Starting parser with following configuration:"
@@ -93,12 +97,14 @@ echo "PARSER_ARGS=${PARSER_ARGS}"
 echo "TOSCAN=$TOSCAN"
 echo "OUTPUT=$OUTPUT"
 
-CMD="java -jar "${PARSER}" -f "${TOSCAN}" -o "${OUTPUT}" ${FINAL_PARSER_ARGS}"
+CMD="java -jar "${PARSER}" -f "${TOSCAN}" -o "${OUTPUT_BASE_TMP}" ${FINAL_PARSER_ARGS}"
 echo "Final command: $CMD"
 $CMD
 
 # Post operations
-# TODO
+echo ""
+java PostMix $OUTPUT_BASE
+rm $OUTPUT_BASE_TMP
 
 # Done !
 echo ""

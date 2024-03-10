@@ -58,6 +58,24 @@ To see all possible options of the underlying parser CLI:
 jtpc parserhelp
 ```
 
+**Static part**  
+Once you generate your diagram once, you probably want to make some light changes like adding associations (as they are not automatically generated sadly). If you directly edit your schema, you will lose your changes during next schema generation because the file is just erased each time. This is way we define a way to write a *static section*, meaning a section that is not erased during regeneration and can contain special actions like removing some patterns.
+
+At the end of the schema you should find this section starting with `' STATIC` and ending in `' ENDSTATIC`. You can safely add uncommented lines for the first 2 parts. You probably noticed the `' REMOVE` line, after this you can add regex pattern that will be replaced in the above text. For example to remove a line like `- currentTime: Time` you could write `' .*: Time`. These lines must be commented ! This is particularly useful to remove some lines related to missing associations you manually added !
+```
+' STATIC
+' Style
+
+' Missing associations
+
+' Post operations
+' REMOVE
+
+' ENDSTATIC
+```
+
+TODO: Checkout the example 
+
 ## How it works
 `jtpc` is just a bash script and Docker image as a convenience to easily run the `plantuml-parser-cli` developed in the original project. In addition to not needing to run `java -jar /mega/long/path/to/full/uber.jar` it enables some post operations to manually adjust the rendering.
 
