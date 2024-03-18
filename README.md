@@ -93,6 +93,7 @@ TODO: Implement EDIT keyword to easily do search and replace
 To fit my teacher's needs or just making things prettier, I did a few changes to the source code which you can read in details in the recent commits, but here is a quick recap:
 1. Show types after variables name: instead of `int age` it displays `age: int`
 1. Add line breaks and tabs after ~70 chars, when methods definitions are too long (this avoids creating very large class rectangle)
+1. Show return type of methods at the end: instead of `String toString()` it displays `toString(): String`.
 
 
 ## How to update

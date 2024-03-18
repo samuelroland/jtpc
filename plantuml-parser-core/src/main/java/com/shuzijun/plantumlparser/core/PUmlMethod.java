@@ -104,9 +104,9 @@ public class PUmlMethod {
     @Override
     public String toString() {
         return VisibilityUtils.toCharacter(visibility) + " " + (isStatic ? "{static} " : "") + (isAbstract ? "{abstract}" : "")
-                + returnType + " " + name + "("
+                + name + "("
                 + (paramList.isEmpty() ? "" : paramsAsString())
-                + ")";
+                + ")" + (returnType.isEmpty() ? "" : ": " + returnType);
     }
 
     public String getFullName(){

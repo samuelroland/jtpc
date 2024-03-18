@@ -269,7 +269,7 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
         if (parserConfig.isMethodModifier(pUmlMethod.getVisibility())) {
             pUmlMethod.setStatic(constructor.isStatic());
             pUmlMethod.setAbstract(constructor.isAbstract());
-            pUmlMethod.setReturnType("<<Create>>");
+            pUmlMethod.setReturnType("");
             pUmlMethod.setName(constructor.getNameAsString());
             for (Parameter parameter : constructor.getParameters()) {
                 // Parameters now contain their type and name !
