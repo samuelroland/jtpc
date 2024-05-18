@@ -9,13 +9,13 @@ To fit my teacher's needs or just making things prettier, I did a few changes to
 1. Show return type of methods at the end: instead of `String toString()` it displays `toString(): String`.
 1. Do not use `<<Create>>` as return type for constructors
 1. Fix intern class association: instead of `+..` (dotted line) it is now `+--` (solid line)
-1. 
-
+1. Show a tab before any field and method to have proper indentation in diagram
 
 **Bugs**
 1. Fix a bug when giving an output path as just a file (without any folder path prefix)
 
-TODO: bug interface attribute are public by default even if not specified...
+**Known unfixed bugs** - If you have a working fix send a PR please ! I don't have time to work on those.
+1. Interface methods should be public (not package) even if not specified, as an interface makes them implicitly public.
 
 *Note*: the IntelliJ plugin build has been disabled because it currently fails and would require some changes to support the same feature as ctp. I will not make it work to have the same feature as I consider the CLI is enough and solves my problem.
 

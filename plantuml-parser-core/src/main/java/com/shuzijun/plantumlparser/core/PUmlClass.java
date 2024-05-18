@@ -69,8 +69,8 @@ public class PUmlClass implements PUml{
         String fullClassName = ((packageName == null || packageName.trim().equals("")) ? "" : (packageName + ".")) + className;
 
         String classStr = classType + " " + fullClassName + " {\n" +
-                (pUmlFieldList.isEmpty() ? "" : pUmlFieldList.stream().map(pUmlField -> pUmlField.toString()).collect(Collectors.joining("\n")) + "\n") +
-                (pUmlMethodList.isEmpty() ? "" : pUmlMethodList.stream().map(pUmlField -> pUmlField.toString()).collect(Collectors.joining("\n")) + "\n") +
+                (pUmlFieldList.isEmpty() ? "" : pUmlFieldList.stream().map(pUmlField -> "\t" + pUmlField.toString()).collect(Collectors.joining("\n")) + "\n") +
+                (pUmlMethodList.isEmpty() ? "" : pUmlMethodList.stream().map(pUmlField -> "\t" + pUmlField.toString()).collect(Collectors.joining("\n")) + "\n") +
                 "}";
 
         if(getClassComment() != null && getClassComment().length() > 0){
