@@ -1,6 +1,6 @@
-# PlantUML Parser for Java
+# PlantUML generator for Java
 
-This is a fork used by `ctp`, checkout [its repos](https://github.com/samuelroland/ctp) if needed !
+This is a fork used by `ctp`, checkout [its repos](https://github.com/samuelroland/ctp) to use this !
 
 **Changes made to the CLI and core logic**  
 To fit my teacher's needs or just making things prettier, I did a few changes to the source code which you can read in details in the recent commits, but here is a quick recap:
