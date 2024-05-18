@@ -353,7 +353,7 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
                 PUmlRelation pUmlRelation = new PUmlRelation();
                 pUmlRelation.setTarget(getPackageNamePrefix(pUmlClass.getPackageName()) + pUmlClass.getClassName());
                 pUmlRelation.setSource(getPackageNamePrefix(pUmlClass.getPackageName()) + pUmlClass.getClassName().substring(0, pUmlClass.getClassName().lastIndexOf("$")));
-                pUmlRelation.setRelation("+..");
+                pUmlRelation.setRelation("+--");	// Fixed: Intern class should have an association of +-- not +..
                 pUmlView.addPUmlRelation(pUmlRelation);
             }
             parseImport(parentNode, pUmlClass, pUmlView);
