@@ -52,17 +52,21 @@ public class ParserProgram {
             }
         }
 
-        if (this.parserConfig.getOutFilePath() == null) {
-            System.out.println(pUmlView);
-        } else {
-            File outFile = new File(this.parserConfig.getOutFilePath());
-            if (!outFile.getParentFile().exists()) {
-                outFile.getParentFile().mkdirs();
+        try {
+            if (this.parserConfig.getOutFilePath() == null) {
+                System.out.println(pUmlView);
+            } else {
+                File outFile = new File(this.parserConfig.getOutFilePath());
+
+                //Create parent folders if necessary
+                File parent = outFile.getParentFile();    //if parent is null, the path only contains the name of the file
+                if (parent != null && !parent.exists())
+                    parent.mkdirs();
+                FileUtils.write(outFile, pUmlView.toString(), Charset.forName("UTF-8"));
             }
-            if (!outFile.exists()) {
-                outFile.createNewFile();
-            }
-            FileUtils.write(outFile, pUmlView.toString(), Charset.forName("UTF-8"));
+        } catch (Exception e) {
+            System.out.println(e + "\n" + "outFilePath=" + this.parserConfig.getOutFilePath());
+            System.exit(2);
         }
 
     }
