@@ -223,6 +223,7 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
             return;
         }
         PUmlClass pUmlClass = (PUmlClass) pUml;
+
         PUmlField pUmlField = new PUmlField();
         if (field.getModifiers().size() != 0) {
             for (Modifier modifier : field.getModifiers()) {
@@ -296,12 +297,22 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
 
         if (method.getModifiers().size() != 0) {
             for (Modifier modifier : method.getModifiers()) {
-                if (VisibilityUtils.isVisibility(modifier.toString().trim())) {
-                    pUmlMethod.setVisibility(modifier.toString().trim());
+                String modifierStr = modifier.toString().trim();
+                if (VisibilityUtils.isVisibility(modifierStr)) {
+                    pUmlMethod.setVisibility(modifierStr);
                     break;
                 }
             }
         }
+
+        // Fixed: if the method is part of an interface and the visibility is the
+        // default one, it should actually be public because interfaces have everything
+        // in public by default
+        boolean partOfInterface = pUmlClass.getClassType().equals("interface");
+        if (partOfInterface && pUmlMethod.getVisibility().equals("default")) {
+            pUmlMethod.setVisibility("public");
+        }
+
         if (parserConfig.isMethodModifier(pUmlMethod.getVisibility())) {
             pUmlMethod.setStatic(method.isStatic());
             pUmlMethod.setAbstract(method.isAbstract());

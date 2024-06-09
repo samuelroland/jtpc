@@ -11,11 +11,12 @@ To fit my teacher's needs or just making things prettier, I did a few changes to
 1. Fix intern class association: instead of `+..` (dotted line) it is now `+--` (solid line)
 1. Show a tab before any field and method to have proper indentation in diagram
 
-**Bugs**
+**Fixed bugs**
 1. Fix a bug when giving an output path as just a file (without any folder path prefix)
+1. Interface methods should be public (not package) when they are not specified, as an interface in Java makes them implicitly public.
 
 **Known unfixed bugs** - If you have a working fix send a PR please ! I don't have time to work on those.
-1. Interface methods should be public (not package) even if not specified, as an interface makes them implicitly public.
+1. bug with subclass name link. Person$Visitor -> sometimes identified justas Visitor making links on 2 blocks but is the same block actually. see mcr pacman.
 
 *Note*: the IntelliJ plugin build has been disabled because it currently fails and would require some changes to support the same feature as ctp. I will not make it work to have the same feature as I consider the CLI is enough and solves my problem.
 
