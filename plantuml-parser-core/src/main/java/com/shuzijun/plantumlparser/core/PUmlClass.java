@@ -111,7 +111,7 @@ public class PUmlClass implements PUml{
                     }else{
                         fieldComment.append("left");
                     }
-                    fieldComment.append(" of ").append(fullClassName).append("::").append(pUmlMethod.getFullName()).append("\n");
+                    fieldComment.append(" of ").append(fullClassName).append("::\"").append(pUmlMethod.getFullName()).append("\"\n");
                     fieldComment.append(pUmlMethod.getComment()).append("\n");
                     fieldComment.append("end note\n");
                     commentIdx++;
