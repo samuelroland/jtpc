@@ -1,8 +1,9 @@
 package com.shuzijun.plantumlparser.core;
 
+import static com.shuzijun.plantumlparser.core.Util.listToString;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * PUml视图
@@ -25,10 +26,9 @@ public class PUmlView implements PUml {
 
     @Override
     public String toString() {
-        return "@startuml\n" +
-                (pUmlClassList.isEmpty() ? "" : pUmlClassList.stream().map(pUmlClass -> pUmlClass.toString()).collect(Collectors.joining("\n")) + "\n") +
-                (pUmlRelationList.isEmpty() ? "" : "\n\n" + pUmlRelationList.stream().map(pUmlRelation -> pUmlRelation.toString()).collect(Collectors.joining("\n")) + "\n") +
-                "@enduml"
-                ;
+        return "@startuml"
+               + listToString(pUmlClassList, "\n", "\n", "")
+               + listToString(pUmlRelationList, "\n", "\n\n", "")
+               + "\n@enduml";
     }
 }

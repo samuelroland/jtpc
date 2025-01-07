@@ -1,8 +1,9 @@
 package com.shuzijun.plantumlparser.core;
 
-import java.util.LinkedList;
+import static com.shuzijun.plantumlparser.core.Util.listToString;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * plantUml类
@@ -18,9 +19,9 @@ public class PUmlClass implements PUml{
 
     private String classComment;
 
-    private List<PUmlField> pUmlFieldList = new LinkedList<>();
+    private List<PUmlField> pUmlFieldList = new ArrayList<>();
 
-    private List<PUmlMethod> pUmlMethodList = new LinkedList<>();
+    private List<PUmlMethod> pUmlMethodList = new ArrayList<>();
 
     public String getPackageName() {
         return packageName;
@@ -67,11 +68,11 @@ public class PUmlClass implements PUml{
     public String toString() {
 
         String fullClassName = ((packageName == null || packageName.trim().equals("")) ? "" : (packageName + ".")) + className;
-
-        String classStr = classType + " " + fullClassName + " {\n" +
-                (pUmlFieldList.isEmpty() ? "" : pUmlFieldList.stream().map(pUmlField -> "\t" + pUmlField.toString()).collect(Collectors.joining("\n")) + "\n") +
-                (pUmlMethodList.isEmpty() ? "" : pUmlMethodList.stream().map(pUmlField -> "\t" + pUmlField.toString()).collect(Collectors.joining("\n")) + "\n") +
-                "}";
+        String delimiter = "\n\t";
+        String classStr = classType + " " + fullClassName + " {"
+                          + listToString(pUmlFieldList, delimiter, delimiter, "")
+                          + listToString(pUmlMethodList, delimiter, delimiter, "")
+                          + "\n}";
 
         if(getClassComment() != null && getClassComment().length() > 0){
             classStr += "\nnote top of "+fullClassName+"\n"+getClassComment()+"\nend note\n";
