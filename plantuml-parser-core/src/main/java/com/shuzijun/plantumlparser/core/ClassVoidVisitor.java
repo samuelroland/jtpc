@@ -1,5 +1,7 @@
 package com.shuzijun.plantumlparser.core;
 
+import static com.shuzijun.plantumlparser.core.Constant.VisibilityPublic;
+
 import com.github.javaparser.ast.*;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
@@ -225,7 +227,11 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
         PUmlClass pUmlClass = (PUmlClass) pUml;
 
         PUmlField pUmlField = new PUmlField();
-        if (field.getModifiers().size() != 0) {
+
+        boolean isDeclaredInInterface = pUmlClass.getClassType().equals("interface");
+        if (isDeclaredInInterface) {
+            pUmlField.setVisibility(VisibilityPublic); // Set constants in the interface to public visibility
+        } else if (field.getModifiers().size() != 0) {
             for (Modifier modifier : field.getModifiers()) {
                 if (VisibilityUtils.isVisibility(modifier.toString().trim())) {
                     pUmlField.setVisibility(modifier.toString().trim());
@@ -315,7 +321,8 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
 
         if (parserConfig.isMethodModifier(pUmlMethod.getVisibility())) {
             pUmlMethod.setStatic(method.isStatic());
-            pUmlMethod.setAbstract(method.isAbstract());
+            // Use a body for methods in interfaces if there is no abstract modifier
+            pUmlMethod.setAbstract(method.isAbstract() || method.getBody().isEmpty());
             pUmlMethod.setReturnType(method.getTypeAsString());
             pUmlMethod.setName(method.getNameAsString());
             for (Parameter parameter : method.getParameters()) {
