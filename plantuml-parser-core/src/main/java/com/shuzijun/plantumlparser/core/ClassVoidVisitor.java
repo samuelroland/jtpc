@@ -13,7 +13,6 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -299,7 +298,6 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
             pUmlField.setValue(variable.getInitializer().get().toString());
         } else {
             // Otherwise, check all static initializer blocks
-            Optional<Node> parentNode1 = variable.getParentNode();
             ClassOrInterfaceDeclaration parentNode = (ClassOrInterfaceDeclaration) field.getParentNode().orElseThrow();
             for (BodyDeclaration<?> b : parentNode.getMembers()) {
                 if (b.isInitializerDeclaration()) {
