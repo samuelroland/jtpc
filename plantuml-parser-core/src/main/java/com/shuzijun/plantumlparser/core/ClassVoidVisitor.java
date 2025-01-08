@@ -6,6 +6,7 @@ import static com.shuzijun.plantumlparser.core.Constant.VisibilityPublic;
 
 import com.github.javaparser.ast.*;
 import com.github.javaparser.ast.body.*;
+import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
@@ -233,31 +234,66 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
                 .filter(VisibilityUtils::isVisibility)
                 .findFirst().orElse(isDeclaredInInterface ? VisibilityPublic : VisibilityDefault);
 
+        if (!parserConfig.isFieldModifier(visibility)) {
+            return;
+        }
+
         NodeList<VariableDeclarator> variables = field.getVariables();
         for (int i = 0; i < variables.size(); i++) {
-            VariableDeclarator variable = variables.get(i);
-            PUmlField pUmlField = new PUmlField();
-            pUmlField.setVisibility(visibility);
-
-            if (parserConfig.isFieldModifier(pUmlField.getVisibility())) {
-                pUmlField.setStatic(field.isStatic());
-                pUmlField.setType(variable.getTypeAsString());
-                pUmlField.setName(variable.getNameAsString());
-                pUmlClass.addPUmlFieldList(pUmlField);
-                // Add the value of the constant initializer to pUmlField.
-                // This is the simplest solution I found. I suppose there is a different way,
-                // using the visit method of the initializer to traverse the AST, but I couldn't implement it.
-                if (field.isFinal() && field.isStatic() && variable.getInitializer().isPresent()) {
-                    int index = variable.toString().indexOf("=");
-                    String value = variable.toString().substring(index + 1).trim();
-                    pUmlField.setValue(value);
-                }
-            }
-
-            if (parserConfig.isShowComment() && i == 0) {
+            PUmlField pUmlField = getPUmlField(field, visibility, variables.get(i));
+            if (i == 0 && parserConfig.isShowComment()) {
                 // Print comment only above the first variable in the declaration
                 field.getComment().ifPresent(comment -> pUmlField.setComment(comment.getContent()));
             }
+            pUmlClass.addPUmlFieldList(pUmlField);
+        }
+    }
+
+    private PUmlField getPUmlField(FieldDeclaration field, String visibility, VariableDeclarator variable) {
+        PUmlField pUmlField = new PUmlField();
+        pUmlField.setVisibility(visibility);
+        pUmlField.setType(variable.getTypeAsString());
+        pUmlField.setName(variable.getNameAsString());
+        pUmlField.setStatic(field.isStatic());
+
+        // Add the value of the constant initializer to pUmlField.
+        if (field.isFinal() && field.isStatic()) {
+            if (variable.getInitializer().isPresent()) {
+                // A simple solution: if the variable has an initializer, just read its value as a string
+                pUmlField.setValue(variable.getInitializer().get().toString());
+            } else {
+                // Otherwise, check all static initializer blocks
+                ClassOrInterfaceDeclaration parentNode = (ClassOrInterfaceDeclaration) field.getParentNode().orElseThrow();
+                for (BodyDeclaration<?> b : parentNode.getMembers()) {
+                    if (b.isInitializerDeclaration()) {
+                        b.accept(this, pUmlField);
+                        // Since the field is a constant, we do not need to check other initializer blocks
+                        if (pUmlField.getValue() != null) break;
+                    }
+                }
+            }
+        }
+
+        return pUmlField;
+    }
+
+    @Override
+    public void visit(InitializerDeclaration id, PUml pUml) {
+        if (!(pUml instanceof PUmlField pUmlField)) {
+            super.visit(id, pUml);
+            return;
+        }
+
+        for (Statement stmt : id.getBody().getStatements()) {
+            stmt.ifExpressionStmt(exprStmt ->
+                    exprStmt.getExpression().ifAssignExpr(assignExpr -> {
+                        if (assignExpr.getTarget().toString().equals(pUmlField.getName())) {
+                            pUmlField.setValue(assignExpr.getValue().toString());
+                        }
+                    })
+            );
+            // Since the field is a constant, we do not need to check other statements
+            if (pUmlField.getValue() != null) return;
         }
     }
 
