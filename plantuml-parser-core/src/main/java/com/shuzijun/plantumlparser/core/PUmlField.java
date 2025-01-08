@@ -11,6 +11,8 @@ public class PUmlField implements PUml {
 
     private boolean isStatic;
 
+    private String value;
+
     private String type;
 
     private String name;
@@ -60,6 +62,14 @@ public class PUmlField implements PUml {
     @Override
     public String toString() {
         return VisibilityUtils.toCharacter(visibility) + " " + (isStatic ? "{static} " : "")
-                + name + ": " + type;
+                + name + ": " + type + (value != null ? " = " + value : "");
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }

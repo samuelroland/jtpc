@@ -243,6 +243,14 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
                 pUmlField.setType(variable.getTypeAsString());
                 pUmlField.setName(variable.getNameAsString());
                 pUmlClass.addPUmlFieldList(pUmlField);
+                // Add the value of the constant initializer to pUmlField.
+                // This is the simplest solution I found. I suppose there is a different way,
+                // using the visit method of the initializer to traverse the AST, but I couldn't implement it.
+                if (field.isFinal() && field.isStatic() && variable.getInitializer().isPresent()) {
+                    int index = variable.toString().indexOf("=");
+                    String value = variable.toString().substring(index + 1).trim();
+                    pUmlField.setValue(value);
+                }
             }
 
             if (parserConfig.isShowComment() && i == 0) {
