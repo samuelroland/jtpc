@@ -13,6 +13,7 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -249,32 +250,65 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
         }
     }
 
+    /**
+     * Creates a PUmlField object representing a field declaration with its properties.
+     * <p>
+     * Optionally determines the constant value if the field is declared as static and final.
+     * It is optional because it has not been tested with long strings or array/collection initializers.
+     * The value is set exactly as it appears in the source code, which may be too long for the diagram.
+     * </p>
+     *
+     * @param field      The field declaration to process.
+     * @param visibility The visibility modifier of the field.
+     * @param variable   The variable declared within the field.
+     * @return A PUmlField object populated with field details.
+     */
     private PUmlField getPUmlField(FieldDeclaration field, String visibility, VariableDeclarator variable) {
         PUmlField pUmlField = new PUmlField();
         pUmlField.setVisibility(visibility);
         pUmlField.setType(variable.getTypeAsString());
         pUmlField.setName(variable.getNameAsString());
         pUmlField.setStatic(field.isStatic());
-
-        // Add the value of the constant initializer to pUmlField.
-        if (field.isFinal() && field.isStatic()) {
-            if (variable.getInitializer().isPresent()) {
-                // A simple solution: if the variable has an initializer, just read its value as a string
-                pUmlField.setValue(variable.getInitializer().get().toString());
-            } else {
-                // Otherwise, check all static initializer blocks
-                ClassOrInterfaceDeclaration parentNode = (ClassOrInterfaceDeclaration) field.getParentNode().orElseThrow();
-                for (BodyDeclaration<?> b : parentNode.getMembers()) {
-                    if (b.isInitializerDeclaration()) {
-                        b.accept(this, pUmlField);
-                        // Since the field is a constant, we do not need to check other initializer blocks
-                        if (pUmlField.getValue() != null) break;
-                    }
-                }
-            }
+        if (parserConfig.isShowConstantValues()) {
+            setConstantValue(pUmlField, field, variable);
         }
 
         return pUmlField;
+    }
+
+    /**
+     * Sets the constant value of a field if it is declared as static and final.
+     * <p>
+     * Checks whether the variable has an initializer. If not, it searches static
+     * initializer blocks within the parent class or interface for assignment expressions
+     * that initialize the field.
+     * </p>
+     *
+     * @param pUmlField The PUmlField object to update with a constant value.
+     * @param field     The field declaration containing the variable.
+     * @param variable  The variable to check for a constant value.
+     */
+    private void setConstantValue(PUmlField pUmlField, FieldDeclaration field, VariableDeclarator variable) {
+        if (!field.isFinal() || !field.isStatic()) {
+            return;
+        }
+
+        // Add the value of the constant initializer to pUmlField.
+        if (variable.getInitializer().isPresent()) {
+            // A simple solution: if the variable has an initializer, just read its value as a string
+            pUmlField.setValue(variable.getInitializer().get().toString());
+        } else {
+            // Otherwise, check all static initializer blocks
+            Optional<Node> parentNode1 = variable.getParentNode();
+            ClassOrInterfaceDeclaration parentNode = (ClassOrInterfaceDeclaration) field.getParentNode().orElseThrow();
+            for (BodyDeclaration<?> b : parentNode.getMembers()) {
+                if (b.isInitializerDeclaration()) {
+                    b.accept(this, pUmlField);
+                    // Since the field is a constant, we do not need to check other initializer blocks
+                    if (pUmlField.getValue() != null) break;
+                }
+            }
+        }
     }
 
     @Override

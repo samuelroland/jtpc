@@ -13,6 +13,7 @@ import com.shuzijun.plantumlparser.cli.options.methodmodifier.MethodProtectedMod
 import com.shuzijun.plantumlparser.cli.options.methodmodifier.MethodPublicModifier;
 import com.shuzijun.plantumlparser.cli.options.outfilepath.OutfilePathOption;
 import com.shuzijun.plantumlparser.cli.options.showcomment.ShowCommentOption;
+import com.shuzijun.plantumlparser.cli.options.showconstantvalue.ShowConstantValuesOption;
 import com.shuzijun.plantumlparser.cli.options.showconstructors.ShowConstructorsOption;
 import com.shuzijun.plantumlparser.cli.options.showdefaultconstructors.ShowDefaultConstructorsOption;
 import com.shuzijun.plantumlparser.cli.options.showpackage.ShowPackageOption;
@@ -48,6 +49,7 @@ public class CliOptionsHolder {
         cliOptions.add(new ShowConstructorsOption());
         cliOptions.add(new ShowDefaultConstructorsOption());
         cliOptions.add(new ShowPackageOption());
+        cliOptions.add(new ShowConstantValuesOption());
 
         // This is a special cli option for displaying the help
         cliOptions.add(new HelpOption(cliOptions));
