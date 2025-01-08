@@ -1,5 +1,6 @@
 package com.shuzijun.plantumlparser.core;
 
+import static com.shuzijun.plantumlparser.core.Constant.VisibilityDefault;
 import static com.shuzijun.plantumlparser.core.Constant.VisibilityPublic;
 
 import com.github.javaparser.ast.*;
@@ -7,7 +8,6 @@ import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -220,39 +220,37 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
 
     @Override
     public void visit(FieldDeclaration field, PUml pUml) {
-        if (!(pUml instanceof PUmlClass)) {
+        if (!(pUml instanceof PUmlClass pUmlClass)) {
             super.visit(field, pUml);
             return;
         }
-        PUmlClass pUmlClass = (PUmlClass) pUml;
-
-        PUmlField pUmlField = new PUmlField();
 
         boolean isDeclaredInInterface = pUmlClass.getClassType().equals("interface");
-        if (isDeclaredInInterface) {
-            pUmlField.setVisibility(VisibilityPublic); // Set constants in the interface to public visibility
-        } else if (field.getModifiers().size() != 0) {
-            for (Modifier modifier : field.getModifiers()) {
-                if (VisibilityUtils.isVisibility(modifier.toString().trim())) {
-                    pUmlField.setVisibility(modifier.toString().trim());
-                    break;
-                }
+        // Analyzes modifiers to determine the visibility level for the field declaration
+        String visibility = field.getModifiers().stream()
+                .map(m -> m.toString().trim())
+                .filter(VisibilityUtils::isVisibility)
+                .findFirst().orElse(isDeclaredInInterface ? VisibilityPublic : VisibilityDefault);
+
+        NodeList<VariableDeclarator> variables = field.getVariables();
+        for (int i = 0; i < variables.size(); i++) {
+            VariableDeclarator variable = variables.get(i);
+            PUmlField pUmlField = new PUmlField();
+            pUmlField.setVisibility(visibility);
+
+            if (parserConfig.isFieldModifier(pUmlField.getVisibility())) {
+                pUmlField.setStatic(field.isStatic());
+                pUmlField.setType(variable.getTypeAsString());
+                pUmlField.setName(variable.getNameAsString());
+                pUmlClass.addPUmlFieldList(pUmlField);
+            }
+
+            if (parserConfig.isShowComment() && i == 0) {
+                // Print comment only above the first variable in the declaration
+                field.getComment().ifPresent(comment -> pUmlField.setComment(comment.getContent()));
             }
         }
-        if (parserConfig.isFieldModifier(pUmlField.getVisibility())) {
-            pUmlField.setStatic(field.isStatic());
-            pUmlField.setType(field.getVariables().getFirst().get().getTypeAsString());
-            pUmlField.setName(field.getVariables().getFirst().get().getNameAsString());
-            pUmlClass.addPUmlFieldList(pUmlField);
-        }
-
-        if (parserConfig.isShowComment()) {
-            field.getComment().ifPresent(comment -> {
-                pUmlField.setComment(comment.getContent());
-            });
-        }
     }
-
 
     @Override
     public void visit(ConstructorDeclaration constructor, PUml pUml) {
