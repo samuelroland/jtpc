@@ -1,6 +1,7 @@
 package com.shuzijun.plantumlparser.core;
 
 import static com.shuzijun.plantumlparser.core.Constant.VisibilityDefault;
+import static com.shuzijun.plantumlparser.core.Constant.VisibilityPrivate;
 import static com.shuzijun.plantumlparser.core.Constant.VisibilityPublic;
 
 import com.github.javaparser.ast.*;
@@ -62,7 +63,7 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
 
         cORid.getFields().forEach(p -> p.accept(this, pUmlClass));
 
-        if (cORid.getConstructors().isEmpty() && parserConfig.isShowDefaultConstructors()) {
+        if (cORid.getConstructors().isEmpty() && parserConfig.isShowDefaultConstructors() && !cORid.isInterface()) {
             ConstructorDeclaration defaultConstructor = new ConstructorDeclaration(cORid.getNameAsString());
             defaultConstructor.accept(this, pUmlClass);
         } else {
@@ -262,23 +263,23 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
 
     @Override
     public void visit(ConstructorDeclaration constructor, PUml pUml) {
-        if (!(pUml instanceof PUmlClass)) {
+        if (!(pUml instanceof PUmlClass pUmlClass)) {
             super.visit(constructor, pUml);
             return;
         }
         if (!parserConfig.isShowConstructors()) {
             return;
         }
-        PUmlClass pUmlClass = (PUmlClass) pUml;
+
+        boolean isEnum = pUmlClass.getClassType().equals("enum");
+        // Analyzes modifiers to determine the visibility level for the constructor declaration
+        String visibility = constructor.getModifiers().stream()
+                .map(m -> m.toString().trim())
+                .filter(VisibilityUtils::isVisibility)
+                .findFirst().orElse(isEnum ? VisibilityPrivate : VisibilityDefault);
+
         PUmlMethod pUmlMethod = new PUmlMethod();
-        if (constructor.getModifiers().size() != 0) {
-            for (Modifier modifier : constructor.getModifiers()) {
-                if (VisibilityUtils.isVisibility(modifier.toString().trim())) {
-                    pUmlMethod.setVisibility(modifier.toString().trim());
-                    break;
-                }
-            }
-        }
+        pUmlMethod.setVisibility(visibility);
         if (parserConfig.isMethodModifier(pUmlMethod.getVisibility())) {
             pUmlMethod.setStatic(constructor.isStatic());
             pUmlMethod.setAbstract(constructor.isAbstract());
