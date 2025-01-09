@@ -1,5 +1,6 @@
 package com.shuzijun.plantumlparser.cli.options;
 
+import com.shuzijun.plantumlparser.cli.options.fieldmodifier.FieldAllModifier;
 import com.shuzijun.plantumlparser.cli.options.fieldmodifier.FieldDefaultModifier;
 import com.shuzijun.plantumlparser.cli.options.fieldmodifier.FieldPrivateModifier;
 import com.shuzijun.plantumlparser.cli.options.fieldmodifier.FieldProtectedModifier;
@@ -7,6 +8,7 @@ import com.shuzijun.plantumlparser.cli.options.fieldmodifier.FieldPublicModifier
 import com.shuzijun.plantumlparser.cli.options.filepath.FilePathOption;
 import com.shuzijun.plantumlparser.cli.options.help.HelpOption;
 import com.shuzijun.plantumlparser.cli.options.languagelevel.LanguageLevelOption;
+import com.shuzijun.plantumlparser.cli.options.methodmodifier.MethodAllModifier;
 import com.shuzijun.plantumlparser.cli.options.methodmodifier.MethodDefaultModifier;
 import com.shuzijun.plantumlparser.cli.options.methodmodifier.MethodPrivateModifier;
 import com.shuzijun.plantumlparser.cli.options.methodmodifier.MethodProtectedModifier;
@@ -35,11 +37,13 @@ public class CliOptionsHolder {
         cliOptions.add(new FieldProtectedModifier());
         cliOptions.add(new FieldDefaultModifier());
         cliOptions.add(new FieldPrivateModifier());
+        cliOptions.add(new FieldAllModifier());
 
         cliOptions.add(new MethodPublicModifier());
         cliOptions.add(new MethodProtectedModifier());
         cliOptions.add(new MethodDefaultModifier());
         cliOptions.add(new MethodPrivateModifier());
+        cliOptions.add(new MethodAllModifier());
 
         cliOptions.add(new OutfilePathOption());
         cliOptions.add(new FilePathOption());
