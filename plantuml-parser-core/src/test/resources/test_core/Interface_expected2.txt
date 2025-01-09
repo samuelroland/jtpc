@@ -1,0 +1,8 @@
+@enduml
+@startuml
+interface Interface {
+	+ {static} EXPLICIT: String = "Hello"
+	+ {static} IMPLICIT: String = "World"
+	+ {static} PI_CONST: double = Math.PI
+}
+@enduml
