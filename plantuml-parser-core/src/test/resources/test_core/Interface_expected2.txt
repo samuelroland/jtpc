@@ -1,4 +1,3 @@
-@enduml
 @startuml
 interface Interface {
 	+ {static} EXPLICIT: String = "Hello"
