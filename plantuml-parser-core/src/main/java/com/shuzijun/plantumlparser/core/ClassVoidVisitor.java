@@ -1,11 +1,15 @@
 package com.shuzijun.plantumlparser.core;
 
+import static com.shuzijun.plantumlparser.core.Constant.VisibilityDefault;
+import static com.shuzijun.plantumlparser.core.Constant.VisibilityPrivate;
+import static com.shuzijun.plantumlparser.core.Constant.VisibilityPublic;
+
 import com.github.javaparser.ast.*;
 import com.github.javaparser.ast.body.*;
+import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -60,7 +64,7 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
 
         cORid.getFields().forEach(p -> p.accept(this, pUmlClass));
 
-        if (cORid.getConstructors().isEmpty() && parserConfig.isShowDefaultConstructors()) {
+        if (cORid.getConstructors().isEmpty() && parserConfig.isShowDefaultConstructors() && !cORid.isInterface()) {
             ConstructorDeclaration defaultConstructor = new ConstructorDeclaration(cORid.getNameAsString());
             defaultConstructor.accept(this, pUmlClass);
         } else {
@@ -218,55 +222,132 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
 
     @Override
     public void visit(FieldDeclaration field, PUml pUml) {
-        if (!(pUml instanceof PUmlClass)) {
+        if (!(pUml instanceof PUmlClass pUmlClass)) {
             super.visit(field, pUml);
             return;
         }
-        PUmlClass pUmlClass = (PUmlClass) pUml;
 
-        PUmlField pUmlField = new PUmlField();
-        if (field.getModifiers().size() != 0) {
-            for (Modifier modifier : field.getModifiers()) {
-                if (VisibilityUtils.isVisibility(modifier.toString().trim())) {
-                    pUmlField.setVisibility(modifier.toString().trim());
-                    break;
-                }
+        boolean isDeclaredInInterface = pUmlClass.getClassType().equals("interface");
+        // Analyzes modifiers to determine the visibility level for the field declaration
+        String visibility = field.getModifiers().stream()
+                .map(m -> m.toString().trim())
+                .filter(VisibilityUtils::isVisibility)
+                .findFirst().orElse(isDeclaredInInterface ? VisibilityPublic : VisibilityDefault);
+
+        if (!parserConfig.isFieldModifier(visibility)) {
+            return;
+        }
+
+        NodeList<VariableDeclarator> variables = field.getVariables();
+        for (int i = 0; i < variables.size(); i++) {
+            PUmlField pUmlField = getPUmlField(field, visibility, variables.get(i));
+            if (i == 0 && parserConfig.isShowComment()) {
+                // Print comment only above the first variable in the declaration
+                field.getComment().ifPresent(comment -> pUmlField.setComment(comment.getContent()));
             }
-        }
-        if (parserConfig.isFieldModifier(pUmlField.getVisibility())) {
-            pUmlField.setStatic(field.isStatic());
-            pUmlField.setType(field.getVariables().getFirst().get().getTypeAsString());
-            pUmlField.setName(field.getVariables().getFirst().get().getNameAsString());
             pUmlClass.addPUmlFieldList(pUmlField);
-        }
-
-        if (parserConfig.isShowComment()) {
-            field.getComment().ifPresent(comment -> {
-                pUmlField.setComment(comment.getContent());
-            });
         }
     }
 
+    /**
+     * Creates a PUmlField object representing a field declaration with its properties.
+     * <p>
+     * Optionally determines the constant value if the field is declared as static and final.
+     * It is optional because it has not been tested with long strings or array/collection initializers.
+     * The value is set exactly as it appears in the source code, which may be too long for the diagram.
+     * </p>
+     *
+     * @param field      The field declaration to process.
+     * @param visibility The visibility modifier of the field.
+     * @param variable   The variable declared within the field.
+     * @return A PUmlField object populated with field details.
+     */
+    private PUmlField getPUmlField(FieldDeclaration field, String visibility, VariableDeclarator variable) {
+        PUmlField pUmlField = new PUmlField();
+        pUmlField.setVisibility(visibility);
+        pUmlField.setType(variable.getTypeAsString());
+        pUmlField.setName(variable.getNameAsString());
+        pUmlField.setStatic(field.isStatic());
+        if (parserConfig.isShowConstantValues()) {
+            setConstantValue(pUmlField, field, variable);
+        }
+
+        return pUmlField;
+    }
+
+    /**
+     * Sets the constant value of a field if it is declared as static and final.
+     * <p>
+     * Checks whether the variable has an initializer. If not, it searches static
+     * initializer blocks within the parent class or interface for assignment expressions
+     * that initialize the field.
+     * </p>
+     *
+     * @param pUmlField The PUmlField object to update with a constant value.
+     * @param field     The field declaration containing the variable.
+     * @param variable  The variable to check for a constant value.
+     */
+    private void setConstantValue(PUmlField pUmlField, FieldDeclaration field, VariableDeclarator variable) {
+        if (!field.isFinal() || !field.isStatic()) {
+            return;
+        }
+
+        // Add the value of the constant initializer to pUmlField.
+        if (variable.getInitializer().isPresent()) {
+            // A simple solution: if the variable has an initializer, just read its value as a string
+            pUmlField.setValue(variable.getInitializer().get().toString());
+        } else {
+            // Otherwise, check all static initializer blocks
+            ClassOrInterfaceDeclaration parentNode = (ClassOrInterfaceDeclaration) field.getParentNode().orElseThrow();
+            for (BodyDeclaration<?> b : parentNode.getMembers()) {
+                if (b.isInitializerDeclaration()) {
+                    b.accept(this, pUmlField);
+                    // Since the field is a constant, we do not need to check other initializer blocks
+                    if (pUmlField.getValue() != null) break;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void visit(InitializerDeclaration id, PUml pUml) {
+        if (!(pUml instanceof PUmlField pUmlField)) {
+            super.visit(id, pUml);
+            return;
+        }
+
+        for (Statement stmt : id.getBody().getStatements()) {
+            stmt.ifExpressionStmt(exprStmt ->
+                    exprStmt.getExpression().ifAssignExpr(assignExpr -> {
+                        if (assignExpr.getTarget().toString().equals(pUmlField.getName())) {
+                            pUmlField.setValue(assignExpr.getValue().toString());
+                        }
+                    })
+            );
+            // Since the field is a constant, we do not need to check other statements
+            if (pUmlField.getValue() != null) return;
+        }
+    }
 
     @Override
     public void visit(ConstructorDeclaration constructor, PUml pUml) {
-        if (!(pUml instanceof PUmlClass)) {
+        if (!(pUml instanceof PUmlClass pUmlClass)) {
             super.visit(constructor, pUml);
             return;
         }
         if (!parserConfig.isShowConstructors()) {
             return;
         }
-        PUmlClass pUmlClass = (PUmlClass) pUml;
+
+        boolean isEnum = pUmlClass.getClassType().equals("enum");
+        // Analyzes modifiers to determine the visibility level for the constructor declaration
+        String visibility = constructor.getModifiers().stream()
+                .map(m -> m.toString().trim())
+                .filter(VisibilityUtils::isVisibility)
+                .findFirst().orElse(isEnum ? VisibilityPrivate : VisibilityDefault);
+
         PUmlMethod pUmlMethod = new PUmlMethod();
-        if (constructor.getModifiers().size() != 0) {
-            for (Modifier modifier : constructor.getModifiers()) {
-                if (VisibilityUtils.isVisibility(modifier.toString().trim())) {
-                    pUmlMethod.setVisibility(modifier.toString().trim());
-                    break;
-                }
-            }
-        }
+        pUmlMethod.setVisibility(visibility);
         if (parserConfig.isMethodModifier(pUmlMethod.getVisibility())) {
             pUmlMethod.setStatic(constructor.isStatic());
             pUmlMethod.setAbstract(constructor.isAbstract());
@@ -315,7 +396,8 @@ public class ClassVoidVisitor extends VoidVisitorAdapter<PUml> implements MyVisi
 
         if (parserConfig.isMethodModifier(pUmlMethod.getVisibility())) {
             pUmlMethod.setStatic(method.isStatic());
-            pUmlMethod.setAbstract(method.isAbstract());
+            // Use a body for methods in interfaces if there is no abstract modifier
+            pUmlMethod.setAbstract(method.isAbstract() || method.getBody().isEmpty());
             pUmlMethod.setReturnType(method.getTypeAsString());
             pUmlMethod.setName(method.getNameAsString());
             for (Parameter parameter : method.getParameters()) {
