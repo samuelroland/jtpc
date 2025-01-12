@@ -57,7 +57,7 @@ public class TestCore {
 
     @Test
     @DisplayName("Test interface")
-    void testInterfaceConstantVisibility() throws Exception {
+    void testInterface() throws Exception {
         ParserConfig parserConfig = new ParserConfig();
         parserConfig.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
         parserConfig.addFieldModifier("public");
@@ -65,15 +65,7 @@ public class TestCore {
         parserConfig.setShowComment(true);
         parserConfig.setShowConstructors(true);
         parserConfig.setShowDefaultConstructors(true);
-        File actualFile = getFile("test_core/Interface.java");
-        parserConfig.addFilePath(actualFile.getAbsolutePath());
-
-        List<String> actualLines = getUmlAsLines(parserConfig, outputStream);
-
-        File expectedFile = getFile("test_core/Interface_expected1.txt");
-        List<String> expectedLines = removeEmptyLines(Files.readAllLines(expectedFile.toPath()).stream());
-
-        assertLinesMatch(expectedLines, actualLines);
+        runTest(parserConfig, "Interface.java", "Interface_expected1.txt");
     }
 
     @Test
@@ -83,34 +75,18 @@ public class TestCore {
         parserConfig.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
         parserConfig.addFieldModifier("public");
         parserConfig.setShowConstantValues(true);
-        File actualFile = getFile("test_core/Interface.java");
-        parserConfig.addFilePath(actualFile.getAbsolutePath());
-
-        List<String> actualLines = getUmlAsLines(parserConfig, outputStream);
-
-        File expectedFile = getFile("test_core/Interface_expected2.txt");
-        List<String> expectedLines = removeEmptyLines(Files.readAllLines(expectedFile.toPath()).stream());
-
-        assertLinesMatch(expectedLines, actualLines);
+        runTest(parserConfig, "Interface.java", "Interface_expected2.txt");
     }
 
     @Test
     @DisplayName("Display enum instances and constructor")
-    void tesEnumOutput() throws Exception {
+    void testEnumOutput() throws Exception {
         ParserConfig parserConfig = new ParserConfig();
         parserConfig.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
         parserConfig.addFieldModifier("*");
         parserConfig.addMethodModifier("*");
         parserConfig.setShowConstructors(true);
-        File actualFile = getFile("test_core/Enum.java");
-        parserConfig.addFilePath(actualFile.getAbsolutePath());
-
-        List<String> actualLines = getUmlAsLines(parserConfig, outputStream);
-
-        File expectedFile = getFile("test_core/Enum_expected1.txt");
-        List<String> expectedLines = removeEmptyLines(Files.readAllLines(expectedFile.toPath()).stream());
-
-        assertLinesMatch(expectedLines, actualLines);
+        runTest(parserConfig, "Enum.java", "Enum_expected1.txt");
     }
 
     @Test
@@ -119,12 +95,17 @@ public class TestCore {
         ParserConfig parserConfig = new ParserConfig();
         parserConfig.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
         parserConfig.addFieldModifier("*");
-        File actualFile = getFile("test_core/MultipleFields.java");
+        runTest(parserConfig, "MultipleFields.java", "MultipleFields_expected.txt");
+    }
+
+    private void runTest(ParserConfig parserConfig, String actualPath, String expectedPath) throws IOException {
+        String baseFolder = "test_core/";
+        File actualFile = getFile(baseFolder + actualPath);
         parserConfig.addFilePath(actualFile.getAbsolutePath());
 
         List<String> actualLines = getUmlAsLines(parserConfig, outputStream);
 
-        File expectedFile = getFile("test_core/MultipleFields_expected.txt");
+        File expectedFile = getFile(baseFolder + expectedPath);
         List<String> expectedLines = removeEmptyLines(Files.readAllLines(expectedFile.toPath()).stream());
 
         assertLinesMatch(expectedLines, actualLines);
