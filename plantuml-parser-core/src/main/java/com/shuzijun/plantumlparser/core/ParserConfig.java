@@ -1,13 +1,8 @@
 package com.shuzijun.plantumlparser.core;
 
 import com.github.javaparser.ParserConfiguration;
-import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Disposer;
 import org.apache.commons.io.FileUtils;
-import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles;
-import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment;
-import org.jetbrains.kotlin.config.CompilerConfiguration;
 
 import java.io.File;
 import java.util.*;
@@ -42,6 +37,8 @@ public class ParserConfig {
     private boolean showDefaultConstructors = false;
 
     private boolean showComment = false;
+
+    private boolean showConstantValues = false;
 
     public Project getProject() {
         return project;
@@ -141,6 +138,14 @@ public class ParserConfig {
         this.showComment = showComment;
     }
 
+    public boolean isShowConstantValues() {
+        return showConstantValues;
+    }
+
+    public void setShowConstantValues(boolean showConstantValues) {
+        this.showConstantValues = showConstantValues;
+    }
+
     public Set<String> getExcludeClassRegex() {
         return excludeClassRegex;
     }
@@ -162,6 +167,5 @@ public class ParserConfig {
         }
         return false;
     }
-
 
 }
